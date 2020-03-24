@@ -34,7 +34,7 @@ public class POP3Server {
 //		if(jdbc.Connect()) {
 //			System.out.println("Success to Connect");
 //		}
-//		ArrayList<Mail> res=jdbc.allMailOfSomeOne("test@mail.davidhwj.cn",-1);
+//		ArrayList<Mail> res=jdbc.allMailOfSomeOne("test@mail.davidhwj.cn",0);
 //		for(int i=0;i<res.size();i++) {
 //			res.get(i).display();
 //		}
@@ -171,6 +171,7 @@ class Service extends Thread{
 	private String userName;
 	private String userMailAddr;
 	private ArrayList<Mail> mails=new ArrayList();
+	BufferedReader br;
 	
 	public Service(Socket client) {
 		this.client=client;
@@ -186,6 +187,7 @@ class Service extends Thread{
 		try {
 			in=client.getInputStream();
 			out=client.getOutputStream();
+			br=new BufferedReader(new InputStreamReader(in));
 		} catch (IOException e) {
 			writeLog(client.getInetAddress().getHostAddress()+":"+client.getPort()+" disconnected");
 			e.printStackTrace();
@@ -200,6 +202,7 @@ class Service extends Thread{
 		update();
 		try {
 			client.close();
+			writeLog("success to diconnect client:"+client.getInetAddress()+":"+client.getPort());
 		} catch (IOException e) {
 			e.printStackTrace();
 			writeLog("fail to diconnect client:"+client.getInetAddress()+":"+client.getPort());
@@ -211,12 +214,13 @@ class Service extends Thread{
 	 */
 	private String readLine() {
 		String res="";
-		BufferedReader br=new BufferedReader(new InputStreamReader(in));
+		
 		try {
 			res=br.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
+		writeLog(res);
 		return res;
 	}
 	/**
@@ -224,6 +228,7 @@ class Service extends Thread{
 	 * @param msg
 	 */
 	private void sendAnswer(String msg) {
+		writeLog(msg);
 		try {
 			String message=msg+"\r\n";
 			out.write(message.getBytes());
@@ -238,8 +243,8 @@ class Service extends Thread{
 	private void sendMail(Mail mail){
 		sendAnswer("+OK mailSize: "+mail.mesLength()+" Bytes");
 		sendAnswer("Date: "+mail.getSendDate());
-		sendAnswer("From: <"+mail.getFrom()+">");
-		sendAnswer("To: <"+mail.getTo()+">");
+		sendAnswer("From: "+mail.getFrom());
+		sendAnswer("To: "+mail.getTo());
 		sendAnswer("Subject: "+mail.getSubject());
 		sendAnswer("Data:");
 		try {
@@ -258,6 +263,7 @@ class Service extends Thread{
 		JDBC jdbc=new JDBC();
 		jdbc.Connect();
 		while(true) {
+			if(client.isClosed())break;
 			String command=readLine();
 			String[] avgs=command.split(" ");
 			if(avgs.length>1) {
@@ -265,22 +271,23 @@ class Service extends Thread{
 					if(jdbc.haveUser(avgs[1])) {//有此用户
 						userMailAddr=avgs[1];
 						userName=jdbc.getNickByMailAddr(userMailAddr);
-						sendAnswer("+OK");break;
+						sendAnswer("+OK user:"+userMailAddr);break;
 					}
 					else {//无此用户
 						sendAnswer("-ERR not exist user");
 					}
 				}
 				else {
-					sendAnswer("-ERR invalid command in this status");
+					sendAnswer("-ERR invalid command in this status:user");
 				}
 			}
 			else {//命令不合法
-				sendAnswer("-ERR invalid command in this status");
+				sendAnswer("-ERR invalid command in this status:user");
 			}
 		}
 		//用户密码
 		while(true) {
+			if(client.isClosed())break;
 			String command=readLine();
 			String[] avgs=command.split(" ");
 			if(avgs.length>1) {
@@ -293,11 +300,11 @@ class Service extends Thread{
 					}
 				}
 				else {
-					sendAnswer("-ERR invalid command in this status");
+					sendAnswer("-ERR invalid command in this status:pass");
 				}
 			}
 			else {//命令不合法
-				sendAnswer("-ERR invalid command in this status");
+				sendAnswer("-ERR invalid command in this status:pass");
 			}
 		}
 		jdbc.Close();
@@ -316,19 +323,31 @@ class Service extends Thread{
 		//list命令
 		while(true) {
 			command=readLine();
+//			avgs=command.split(" ");
+			writeLog(command.toLowerCase());
 			if(command.toLowerCase().equals("list")) {
-				mails=jdbc.allMailOfSomeOne(userMailAddr,0);//所有属于用户的未邮件
+				
+				mails=jdbc.allMailOfSomeOne(userMailAddr,0);//所有属于用户的未读邮件
+				mails.addAll( jdbc.allMailOfSomeOne(userMailAddr,-1) );//所有属于用户的删除邮件
+				mails.addAll( jdbc.allMailOfSomeOne(userMailAddr,1) );//所有属于用户的未读邮件
+				
 				for(int i=0;i<mails.size();i++) {
 					int index=i+1;
-					sendAnswer(index+" "+mails.get(i).mesLength());
+					sendAnswer(index+" "+mails.get(i).mesLength()+" "+mails.get(i).getStatus());
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				sendAnswer(".");break;
 			}
 			else {
-				sendAnswer("-ERR invalid command in this status");
+				sendAnswer("-ERR invalid command in this status:list");
 			}
 		}
-		//retr和dele命令
+		//quit、retr、dele和ddele命令
 		while(true) {
 			command=readLine();
 			avgs=command.split(" ");
@@ -337,7 +356,8 @@ class Service extends Thread{
 					break;
 				}
 				else {
-					sendAnswer("-ERR invalid command in this status");
+					
+					sendAnswer("-ERR invalid command in this status:quit"+"  "+command);
 				}
 			}
 			else if(avgs.length==2) {
@@ -392,12 +412,37 @@ class Service extends Thread{
 						sendAnswer("-ERR invlid parament of command dele");
 					}
 				}
+				else if(avgs[0].toLowerCase().equals("ddele")) {//ddele命令
+					boolean flag=false;
+					String s=avgs[1];
+					for(int i=0;i<s.length();i++) {
+						if('0'<=s.charAt(i)&&s.charAt(i)<='9') {
+							flag=true;
+						}
+						else {
+							flag=false;break;
+						}
+					}
+					if(flag) {//合法参数
+						int index=Integer.parseInt(s);
+						if(index>0&&index<=mails.size()) {
+							mails.get(index-1).setStatus(-2);//暂时标记为-2在update阶段更新数据库
+							sendAnswer("+OK mail "+index+" will be deleted forever");
+						}
+						else {
+							sendAnswer("-ERR invlid parament of command ddele");
+						}
+					}
+					else {//不合法参数
+						sendAnswer("-ERR invlid parament of command ddele");
+					}
+				}
 				else {
-					sendAnswer("-ERR invalid command in this status");
+					sendAnswer("-ERR invalid command in this status:retr/dele/ddele");
 				}
 			}
 			else {
-				sendAnswer("-ERR invalid command in this status");
+				sendAnswer("-ERR invalid command in this status:retr/dele/ddele");
 			}
 		}
 		
@@ -440,6 +485,7 @@ class Service extends Thread{
 	 * @param log
 	 */
 	private void writeLog(String log) {
+		System.out.print(log.length()+" ");
 		System.out.println(log);
 	}
 }
@@ -516,26 +562,49 @@ class JDBC{
 	 */
 	public boolean setMailStatus(Mail mail,int status) {
 		PreparedStatement stmt=null;
-		String sql="UPDATE mail set status=? WHERE Num=?";
-		try {
-			if(!Connect()) {
-				System.out.println("fail to connect");
-			}
-			else {
-				stmt=conn.prepareStatement(sql);
-				stmt.setInt(1, status);
-				stmt.setInt(2, mail.getNum());
-				stmt.executeUpdate();
-				
-				stmt.close();
+		if(status==-2) {//需要彻底删除
+			String sql="DELETE FROM mail WHERE Num=?";
+			try {
+				if(!Connect()) {
+					System.out.println("fail to connect");
+				}
+				else {
+					stmt=conn.prepareStatement(sql);
+					stmt.setInt(1, mail.getNum());
+					stmt.executeUpdate();
+					
+					stmt.close();
+					Close();
+				}
+				return true;
+			} catch (SQLException e) {
+				e.printStackTrace();
 				Close();
-			}
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			Close();
-			return false;
-		}		
+				return false;
+			}		
+		}
+		else {
+			String sql="UPDATE mail set status=? WHERE Num=?";
+			try {
+				if(!Connect()) {
+					System.out.println("fail to connect");
+				}
+				else {
+					stmt=conn.prepareStatement(sql);
+					stmt.setInt(1, status);
+					stmt.setInt(2, mail.getNum());
+					stmt.executeUpdate();
+					
+					stmt.close();
+					Close();
+				}
+				return true;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				Close();
+				return false;
+			}		
+		}	
 	}
 	/**
 	 * 根据用户邮箱获取用户昵称

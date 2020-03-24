@@ -1,9 +1,8 @@
-package ttt;
+package mailServer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import com.mysql.cj.jdbc.Driver;
@@ -25,12 +23,12 @@ import com.mysql.cj.jdbc.Driver;
 public class SMTPserver {
 	public static void main(String[] args) {
 		
-		/*******·şÎñÆ÷²âÊÔ***************************/
+		/*******ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½***************************/
 		SMTPserver server=SMTPserver.createDemo();
 		server.start();
 //		server.stop();
 		
-		/********Êı¾İ¿âÁ¬½Ó²âÊÔ************************/
+		/********ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½************************/
 		
 //		JDBC jdbc=new SmtpJDBC();
 //		if(jdbc.Connect()) {
@@ -52,16 +50,16 @@ public class SMTPserver {
 		
 	}
 	
-	//SMTP·şÎñÆ÷¼àÌıµÄ¶Ë¿Ú
+	//POP3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¶Ë¿ï¿½
 	private static final int PORT=25;
 	private static ServerSocket ss=null;
 	
-	//ÔÚ·şÎñÖĞµÄ¿Í»§¶ËÊı Ê¹ÓÃÏß³ÌÍ¬²½µÄ·½·¨·ÃÎÊ
+	//ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ĞµÄ¿Í»ï¿½ï¿½ï¿½ï¿½ï¿½ Ê¹ï¿½ï¿½ï¿½ß³ï¿½Í¬ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	private static int clientCount=0;
-	//·şÎñµÄ×´Ì¬
+	//ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
 	private boolean ISRUNNING=false;
 
-	//µ¥ÀıÄ£Ê½±£Ö¤Ö»ÓĞÒ»¸öSMTP·şÎñÆ÷
+	//ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½Ö¤Ö»ï¿½ï¿½Ò»ï¿½ï¿½POP3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	private static SMTPserver server=null;
 	private SMTPserver() {}
 	public static SMTPserver createDemo() {
@@ -74,7 +72,7 @@ public class SMTPserver {
 		}
 	}
 	/**
-	 * Æô¶¯·şÎñÆ÷
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * @return
 	 */
 	public boolean start() {
@@ -88,7 +86,7 @@ public class SMTPserver {
 				return false;
 			}
 			Thread task=new Thread() {
-				//Ïß³ÌÈë¿ÚÑ­»·µÈ´ıÁ¬½Ó
+				//ï¿½ß³ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½
 				public void run() {
 					while(true) {
 						try {
@@ -112,7 +110,7 @@ public class SMTPserver {
 		return true;
 	}
 	/**
-	 * Í£Ö¹·şÎñÆ÷
+	 * Í£Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * @return
 	 */
 	public boolean stop() {
@@ -133,7 +131,7 @@ public class SMTPserver {
 				}
 				writeLog("Success to close Demo");
 				ss=null;
-				ISRUNNING=false;//¹Ø±Õ³É¹¦
+				ISRUNNING=false;//ï¿½Ø±Õ³É¹ï¿½
 				return true;
 			}
 			
@@ -142,17 +140,17 @@ public class SMTPserver {
 			return false;
 		}
 	}
-	//¿Í»§¶ËÊıµÄ·ÃÎÊ·½·¨
+	//ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½Ê·ï¿½ï¿½ï¿½
 	synchronized public static void addClientCount() {
 		clientCount++;
 	}
 	synchronized public static void decClientCount() {
 		clientCount--;
 	}
-	//·şÎñÆ÷×´Ì¬µÄÉèÖÃ·½·¨
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ã·ï¿½ï¿½ï¿½
 	public boolean getISRUNNING() {return ISRUNNING;}
 	/**
-	 * Ğ´ÈëÈÕÖ¾
+	 * Ğ´ï¿½ï¿½ï¿½ï¿½Ö¾
 	 * @param log
 	 */
 	private void writeLog(String log) {
@@ -162,7 +160,7 @@ public class SMTPserver {
 
 }
 /**
- * Îª¿Í»§¶ËÌá¹©·şÎñ
+ * Îªï¿½Í»ï¿½ï¿½ï¿½ï¿½á¹©ï¿½ï¿½ï¿½ï¿½
  * @author HWJ
  *
  */
@@ -173,18 +171,25 @@ class SmtpService extends Thread{
 	private String userName;
 	private String userMailAddr;
 	private ArrayList<SmtpMail> mails=new ArrayList();
+	BufferedReader br;
 	
 	public SmtpService(Socket client) {
 		this.client=client;
+		try {
+			br=new BufferedReader(new InputStreamReader(client.getInputStream()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
 	 * provide Demo to Client
 	 */
 	private void pop3Service() {
-		writeLog("provide Service for client : "+client.getInetAddress().getHostAddress()+":"+client.getPort());
+		writeLog("provide pop3Service for client : "+client.getInetAddress().getHostAddress()+":"+client.getPort());
 		
-		//»ñÈ¡ÊäÈëÊä³öÁ÷
+		//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		try {
 			in=client.getInputStream();
 			out=client.getOutputStream();
@@ -192,10 +197,11 @@ class SmtpService extends Thread{
 			writeLog(client.getInetAddress().getHostAddress()+":"+client.getPort()+" disconnected");
 			e.printStackTrace();
 		}
+		/*******pop3Ğ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*************/
 		sendAnswer("220 +OK SMTP server ready");
-		//ÌØĞí½×¶Î
+		//ï¿½ï¿½ï¿½ï¿½×¶ï¿½
 		authorization();
-		//ÊÂÎï´¦Àí½×¶Î
+		//ï¿½ï¿½ï¿½ï´¦ï¿½ï¿½×¶ï¿½
 		resolve();
 		try {
 			client.close();
@@ -205,12 +211,12 @@ class SmtpService extends Thread{
 		}
 	}
 	/**
-	 * ¶ÁÈ¡Ò»ĞĞ
+	 * ï¿½ï¿½È¡Ò»ï¿½ï¿½
 	 * @return
 	 */
 	private String readLine() {
 		String res="";
-		BufferedReader br=new BufferedReader(new InputStreamReader(in));
+		
 		try {
 			res=br.readLine();
 		} catch (IOException e) {
@@ -219,7 +225,7 @@ class SmtpService extends Thread{
 		return res;
 	}
 	/**
-	 * ¸ø¿Í»§¶Ë»ØÏûÏ¢
+	 * ï¿½ï¿½ï¿½Í»ï¿½ï¿½Ë»ï¿½ï¿½ï¿½Ï¢
 	 * @param msg
 	 */
 	private void sendAnswer(String msg) {
@@ -232,7 +238,7 @@ class SmtpService extends Thread{
 	}
 	
 	/**
-	 * ÌØĞí½×¶Î
+	 * ï¿½ï¿½ï¿½ï¿½×¶ï¿½
 	 * @return
 	 */
 	private boolean authorization() {
@@ -256,24 +262,24 @@ class SmtpService extends Thread{
 				continue;
 			}
 			
-				if(jdbc.haveUser(command)) {//ÓĞ´ËÓÃ»§
+				if(jdbc.haveUser(command)) {//æœ‰æ­¤ç”¨æˆ·
 					userMailAddr=command;
 					userName=jdbc.getNickByMailAddr(userMailAddr);
 					sendAnswer("250 OK");break;
 				}
-				else {//ÎŞ´ËÓÃ»§
+				else {//æ— æ­¤ç”¨æˆ·
 					sendAnswer("251 ERR not exist user");
 				}
 				
 			
 		}
-		//ÓÃ»§ÃÜÂë
+		//ç”¨æˆ·å¯†ç 
 		while(true) {
 			String command=readLine();
-					if(jdbc.verifyPass(userMailAddr, command)) {//ÃÜÂëÕıÈ·
+					if(jdbc.verifyPass(userMailAddr, command)) {//å¯†ç æ­£ç¡®
 						break;
 					}
-					else {//ÃÜÂë´íÎó
+					else {//å¯†ç é”™è¯¯
 						sendAnswer("504 ERR worry password");
 					}
 				
@@ -284,16 +290,16 @@ class SmtpService extends Thread{
 		return true;
 	}
 	/**
-	 * ÊÂÎï´¦Àí½×¶Î
+	 * ï¿½ï¿½ï¿½ï´¦ï¿½ï¿½×¶ï¿½
 	 * @return
 	 */
-	private boolean resolve() {
+private boolean resolve() {
 		
 		String command;
 		String[] avgs;
 		boolean dataFlag = false;
 		SmtpMail mail = new SmtpMail();
-		//mail fromÃüÁî
+		//mail fromå‘½ä»¤
 		while(true) {
 			command=readLine();
 			avgs=command.split(":");
@@ -306,7 +312,7 @@ class SmtpService extends Thread{
 				sendAnswer("503 invalid command");
 			}
 		}
-		//rcpttoÃüÁî
+		//rcpttoå‘½ä»¤
 		while(true) {
 			command=readLine();
 			avgs=command.split(":");
@@ -319,7 +325,7 @@ class SmtpService extends Thread{
 				sendAnswer("503 invalid command");
 			}
 		}
-		//dataÃüÁî
+		//dataå‘½ä»¤
 		while(true) {
 			command=readLine();
 			if(command.toLowerCase().equals("data") && !dataFlag) {
@@ -337,8 +343,10 @@ class SmtpService extends Thread{
 				avgs=command.split(":");
 				if(avgs.length>1 && avgs[0].toLowerCase().equals("subject")) {
 					mail.setSubject(avgs[1]);
+					mail.appendMain(command+"\r\n");
 				}
-				mail.appendMain(command);
+				else
+					mail.appendMain(command);
 				sendAnswer("250 succcuss");
 			}
 		}
@@ -354,7 +362,7 @@ class SmtpService extends Thread{
 		return true;
 	}
 	/**
-	 * ¸üĞÂ½×¶Î
+	 * æ›´æ–°é˜¶æ®µ
 	 * @return
 	 */
 	private boolean update(SmtpMail mail) {
@@ -363,14 +371,17 @@ class SmtpService extends Thread{
 		java.sql.Date date = new java.sql.Date(time);
 		mail.setDate(date);
 		java.sql.Timestamp theTime = new java.sql.Timestamp(System.currentTimeMillis());
-		if(!mail.getTo().substring(mail.getTo().indexOf("@")+1).equals("davidhwj.cn")) {
-			SendTMail ss = new SendTMail(mail);
-			ss.send();
+		String timeTemp = theTime.toString().replaceAll(" ", "");
+		timeTemp = timeTemp.replaceAll("\\.", "_");
+		timeTemp = timeTemp.replaceAll("\\:", "_");
+		timeTemp = timeTemp.replaceAll("-", "_");
+		if(false) {
+			
 		}
 		else {
 			try {
-	            File writeName = new File("C:\\ProgramData\\\\Mail\\"+mail.getSubject()+theTime.toString()+".txt"); // Ïà¶ÔÂ·¾¶£¬Èç¹ûÃ»ÓĞÔòÒª½¨Á¢Ò»¸öĞÂµÄoutput.txtÎÄ¼ş
-	            writeName.createNewFile(); // ´´½¨ĞÂÎÄ¼ş,ÓĞÍ¬ÃûµÄÎÄ¼şµÄ»°Ö±½Ó¸²¸Ç
+	            File writeName = new File("C:\\ProgramData\\Mail\\"+mail.getSubject()+timeTemp+".txt"); // ç›¸å¯¹è·¯å¾„ï¼Œå¦‚æœæ²¡æœ‰åˆ™è¦å»ºç«‹ä¸€ä¸ªæ–°çš„output.txtæ–‡ä»¶
+	            writeName.createNewFile(); // åˆ›å»ºæ–°æ–‡ä»¶,æœ‰åŒåçš„æ–‡ä»¶çš„è¯ç›´æ¥è¦†ç›–
 	            try (FileWriter writer = new FileWriter(writeName);
 	                 BufferedWriter out = new BufferedWriter(writer)
 	            ) {
@@ -380,12 +391,12 @@ class SmtpService extends Thread{
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }
-			mail.setDatapath("C:\\ProgramData\\Mail\\"+mail.getSubject()+theTime.toString()+".txt");
+			mail.setDatapath("C:\\ProgramData\\Mail\\"+mail.getSubject()+timeTemp+".txt");
 			if(jdbc.Connect()) {
 				jdbc.setMail(mail, 0);
 			}
 			else {
-				writeLog("¸üĞÂ½×¶Î¸üĞÂÊı¾İ¿âÊ§°Ü");
+				writeLog("æ›´æ–°é˜¶æ®µæ›´æ–°æ•°æ®åº“å¤±è´¥");
 				return false;
 			}
 		}
@@ -406,7 +417,7 @@ class SmtpService extends Thread{
 		SMTPserver.decClientCount();
 	}
 	/**
-	 * Ğ´ÈëÈÕÖ¾
+	 * å†™å…¥æ—¥å¿—
 	 * @param log
 	 */
 	private void writeLog(String log) {
@@ -414,19 +425,19 @@ class SmtpService extends Thread{
 	}
 }
 /**
- * Êı¾İ¿â²Ù×÷
+ * ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½ï¿½
  * @author HWJ
  *
  */
 class SmtpJDBC{
-	// Êı¾İ¿â URL
+	// ï¿½ï¿½ï¿½İ¿ï¿½ URL
     static final String DB_URL = "jdbc:mysql://47.106.20.56:3306/mailserver?useSSL=false&serverTimezone=UTC";
  
-    // Êı¾İ¿âµÄÓÃ»§ÃûÓëÃÜÂë
+    // ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     static final String USERNAME = "root";
     static final String PASSWORD = "@SkyrimOf3";
     		
-    //Êı¾İ¿âÁ¬½Ó
+    //ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½ï¿½ï¿½
     private static Connection conn=null;
     
 	public SmtpJDBC() {
@@ -479,9 +490,9 @@ class SmtpJDBC{
 		}
 	}
 	/**
-	 * ÉèÖÃÊı¾İ¿âÖĞÓÊ¼şµÄ×´Ì¬
-	 * @param mail ÒªĞŞ¸ÄµÄÓÊ¼ş
-	 * @param status Ä¿±ê×´Ì¬
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½×´Ì¬
+	 * @param mail Òªï¿½Ş¸Äµï¿½ï¿½Ê¼ï¿½
+	 * @param status Ä¿ï¿½ï¿½×´Ì¬
 	 * @return
 	 */
 	public boolean setMail(SmtpMail mail,int status) {
@@ -511,7 +522,7 @@ class SmtpJDBC{
 		}		
 	}
 	/**
-	 * ¸ù¾İÓÃ»§ÓÊÏä»ñÈ¡ÓÃ»§êÇ³Æ
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ã»ï¿½ï¿½Ç³ï¿½
 	 * @param mailAddr
 	 * @return
 	 */
@@ -544,7 +555,7 @@ class SmtpJDBC{
 	}
 	
 	/**
-	 * ²éÑ¯´ËÓÃ»§ÊÇ·ñ´æÔÚ
+	 * ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 	 * @param AccountOrNick
 	 * @return
 	 */
@@ -562,7 +573,7 @@ class SmtpJDBC{
 				stmt.setString(1, AccountOrNick);
 				rs=stmt.executeQuery();
 				while(rs.next()){
-	                // Í¨¹ı×Ö¶Î¼ìË÷
+	                // Í¨ï¿½ï¿½ï¿½Ö¶Î¼ï¿½ï¿½ï¿½
 	                String account  = rs.getString("account");
 //	                writeLog(account);
 	                res= true;break;
@@ -580,7 +591,7 @@ class SmtpJDBC{
 
 	}
 	/**
-	 * ÑéÖ¤ÃÜÂë
+	 * ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½
 	 * @param AccountOrNick
 	 * @param Pass
 	 * @return
@@ -599,7 +610,7 @@ class SmtpJDBC{
 				stmt.setString(1, Account);
 				rs=stmt.executeQuery();
 				while(rs.next()){
-	                // Í¨¹ı×Ö¶Î¼ìË÷
+	                // Í¨ï¿½ï¿½ï¿½Ö¶Î¼ï¿½ï¿½ï¿½
 	                String pass  = rs.getString("password");
 //	                writeLog(pass);
 	                if(pass.equals(Pass)) {
@@ -621,12 +632,76 @@ class SmtpJDBC{
 		}	
 	}
 	/**
-	 * Ğ´ÈëÈÕÖ¾
+	 * Ğ´ï¿½ï¿½ï¿½ï¿½Ö¾
 	 * @param log
 	 */
 	private void writeLog(String log) {
 		System.out.println(log);
 	}
 }
-
+/**
+ * ï¿½Ê¼ï¿½ï¿½ï¿½
+ * @author HWJ
+ *
+ */
+class SmtpMail{
+	//ï¿½Ê¼ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	private int NUM;
+	//ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	private Date SENDDATE;
+	//ï¿½Ê¼ï¿½ï¿½Ä·ï¿½ï¿½ÍºÍ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	private String FROM,TO;
+	//ï¿½æ´¢ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½
+	private String DATAPATH;
+	//ï¿½Ê¼ï¿½×´Ì¬0Î´ï¿½ï¿½1ï¿½Ñ¶ï¿½-1ï¿½ï¿½É¾ï¿½ï¿½
+	private int STATUS;
+	private String SUBJECT;
+	//ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½
+	private String MAILBODY;
+	
+	public SmtpMail() {
+		MAILBODY = "";
+	}
+	
+	//ï¿½â²¿ï¿½ï¿½È¡ï¿½Ê¼ï¿½ï¿½ï¿½Ï¢
+	public int getNum() {return NUM;}
+	public Date getSendDate() {return SENDDATE;}
+	public String getFrom() {return FROM;}
+	public String getTo() {return TO;}
+	public String getDatapath() {return DATAPATH;}
+	public String getMailBody() {return MAILBODY;}
+	public String getSubject() {return SUBJECT;}
+	public int getStatus() {return STATUS;}
+	//ï¿½ï¿½ï¿½ï¿½
+	public void setDate(Date date) {this.SENDDATE = date;}
+	public void setFrom(String from) {this.FROM = from;}
+	public void setTo(String to) {this.TO = to;}
+	public void setDatapath(String path) {this.DATAPATH = path;}
+	public void setSubject(String subject) {this.SUBJECT = subject;}
+	public void appendMain(String temp) {MAILBODY = MAILBODY.concat(temp);}
+	//ï¿½Ê¼ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	public int mesLength(){
+		File f=new File(DATAPATH);		
+		return (int) f.length();
+	}
+	
+	public boolean setStatus(int status) {
+		this.STATUS=status;
+		return true;
+	}
+	public void display() {
+	    System.out.print("FROM: " + FROM);
+	    System.out.print("	TO: " + TO);
+	    System.out.print("	DATAPATH: " + DATAPATH);
+	    System.out.print("	STATUS: " + STATUS);
+	    System.out.print("\n");
+	}
+	/**
+	 * Ğ´ï¿½ï¿½ï¿½ï¿½Ö¾
+	 * @param log
+	 */
+	private void writeLog(String log) {
+		System.out.println(log);
+	}
+}
 
